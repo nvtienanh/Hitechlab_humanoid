@@ -1,0 +1,12 @@
+<launch>
+
+	<group ns="PysicalDevice">
+		<node pkg="uxa_serial" name="serial" type="uxa_serial"/>
+	</group>
+
+	<group ns="DeviceDriver">
+		<node pkg="uxa_sam_driver" name="sam_driver" type="uxa_sam_driver"/>
+		<node pkg="uxa_uic_driver" name="uic_driver" type="uxa_uic_driver"/>
+	</group>
+
+</launch>

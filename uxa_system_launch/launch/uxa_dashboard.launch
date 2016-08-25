@@ -1,0 +1,6 @@
+<launch>		
+<node pkg="uxa_sam_driver" name="sam_driver" type="uxa_sam_driver" output="screen"/>
+		<node pkg="uxa_uic_driver" name="uic_driver" type="uxa_uic_driver" output="screen"/>
+<node pkg="uxa_dashboard" name="UXA_DASHBOARD" type="uxa_dashboard"/>
+	
+</launch>

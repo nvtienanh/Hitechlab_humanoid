@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <name>uxa_system_launch</name>
+  <version>0.0.0</version>
+  <description>The uxa_system_launch package</description>
+
+  <maintainer email="90kwkw@gmail.com">minki son</maintainer>
+
+  <license>TODO</license>
+
+
+
+  <export>
+
+  </export>
+</package>

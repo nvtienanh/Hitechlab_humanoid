@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package>
+  <name>uxa_sam_driver</name>
+  <version>0.0.0</version>
+  <description>The uxa_sam_driver package</description>
+
+  <maintainer email="90kwkw@gmail.com">minki son</maintainer>
+
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>uxa_serial_msgs</build_depend>
+  <build_depend>uxa_sam_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+
+  <run_depend>uxa_serial_msgs</run_depend>
+  <run_depend>uxa_sam_msgs</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>std_msgs</run_depend>
+
+
+  <export>
+
+  </export>
+</package>

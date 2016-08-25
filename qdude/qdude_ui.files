@@ -1,0 +1,11 @@
+include/qdude/main_window.hpp
+include/qdude/qnode.hpp
+resources/images/icon.png
+resources/images.qrc
+src/main.cpp
+src/main_window.cpp
+src/qnode.cpp
+ui/main_window.ui
+CMakeLists.txt
+mainpage.dox
+package.xml
