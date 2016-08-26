@@ -10,8 +10,7 @@
 
 #include <uxa_sam_msgs/position_move.h>
 #include <uxa_sam_msgs/std_position_move.h>
-#include <uxa_sam_msgs/sam_state.h>
-
+#include <uxa_sam_msgs/sam_response.h>
 
 using namespace std;
 
@@ -25,5 +24,5 @@ void Message_sender(unsigned char *Send_data, int Size);
 void SAM_send_position(unsigned char id, unsigned char torq, unsigned char pos);
 void SAM_get_state(unsigned char id);
 void SAM_send_std_position(unsigned char id, unsigned int pos);
-
+extern ros::ServiceClient sam_driver_client;
 #endif // SAM_PACKET_H

@@ -4,6 +4,7 @@ uxa_serial_msgs::transmit serial_pub_msg;
 
 ros::Publisher uxa_serial_pub, sam_state_pub;
 ros::Subscriber uxa_serial_sub, sam_driver_position_move_sub, sam_driver_std_position_move_sub;
+ros::ServiceClient sam_driver_client;
 
 unsigned char Send_buf[_MSG_BUFF_SIZE];
 
@@ -27,7 +28,7 @@ void SAM_STD_POS_MOVE_FUNC(const uxa_sam_msgs::std_position_move::ConstPtr &msg)
 
 void Init_Message()
 {
-    ros::NodeHandle n;
+    ros::NodeHandle n;    
 
     uxa_serial_pub = n.advertise<uxa_serial_msgs::transmit>
             ("uxa_serial_subscriber", _MSG_BUFF_SIZE);
@@ -44,11 +45,14 @@ void Init_Message()
     sam_driver_std_position_move_sub = n.subscribe<uxa_sam_msgs::std_position_move>
             ("sam_driver_std_position_move", _MSG_BUFF_SIZE, SAM_STD_POS_MOVE_FUNC);
 
+    sam_driver_client = n.serviceClient<uxa_sam_msgs::sam_response>("sam_cmd");
+
+
 }
 
 void Message_sender(unsigned char *Send_data, int Size)
 {
-    for(char cnt = 0; cnt < Size; cnt++)
+    for(int cnt = 0; cnt < Size; cnt++)
     {
         serial_pub_msg.tx_data = Send_data[cnt];
         uxa_serial_pub.publish(serial_pub_msg);
@@ -59,12 +63,14 @@ void SAM_send_position(unsigned char id, unsigned char torq, unsigned char pos)
 {
     unsigned char cnt = 0;
 
+
     Send_buf[cnt++] = 0xFF;
     Send_buf[cnt++] = id | (torq << 5);
     Send_buf[cnt++] = pos;
     Send_buf[cnt++] = (Send_buf[1]^Send_buf[2]) & 0x7F;
 
-    Message_sender(Send_buf, cnt);
+    Message_sender(Send_buf, cnt);    
+
 }
 
 void SAM_send_std_position(unsigned char id, unsigned int pos14)

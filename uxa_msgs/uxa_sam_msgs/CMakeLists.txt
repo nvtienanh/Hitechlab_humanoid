@@ -12,14 +12,13 @@ find_package(catkin REQUIRED COMPONENTS
    FILES
    position_move.msg
    std_position_move.msg
-   sam_state.msg
-   Num.msg
 )
 
 add_service_files(
     DIRECTORY srv
     FILES
-    AddTwoInts.srv)
+    sam_response.srv
+    )
 
  generate_messages(
    DEPENDENCIES
@@ -32,7 +31,6 @@ catkin_package(
    message_runtime
    message_generation
 )
-
 
 install(DIRECTORY include/${PROJECT_NAME}/
 	DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}

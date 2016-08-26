@@ -1,4 +1,4 @@
-#include "uxa_serial.h"
+#include "../include/uxa_serial.h"
 
 int main(int argc, char **argv)
 {
@@ -9,6 +9,7 @@ int main(int argc, char **argv)
 
     ros::Publisher uxa_serial_pub = n.advertise<uxa_serial_msgs::receive>("uxa_serial_publisher", _MSG_BUFF_SIZE);
     ros::Subscriber uxa_serial_sub = n.subscribe<uxa_serial_msgs::transmit>("uxa_serial_subscriber", _MSG_BUFF_SIZE, rev_func);
+    ros::ServiceServer sam_service = n.advertiseService("sam_cmd", response_func);
 
     ros::Rate loop_rate(1000);
     uxa_serial_msgs::receive msg;
@@ -38,17 +39,17 @@ int main(int argc, char **argv)
         Send_Serial_String(Serial, Trans_chr, cnt);
         sleep(1);
 
-        cnt = 0;
+//        cnt = 0;
 
-        Trans_chr[cnt++] = 0xFF;
-        Trans_chr[cnt++] = (unsigned char)(7 << 5);
-        Trans_chr[cnt++] = 225;
-        Trans_chr[cnt++] = 0;
-        Trans_chr[cnt++] = 0X07;
-        Trans_chr[cnt++] = (Trans_chr[1]^Trans_chr[2]^Trans_chr[3]^Trans_chr[4]) & 0x7F;
+//        Trans_chr[cnt++] = 0xFF;
+//        Trans_chr[cnt++] = (unsigned char)(7 << 5);
+//        Trans_chr[cnt++] = 225;
+//        Trans_chr[cnt++] = 0;
+//        Trans_chr[cnt++] = 0X07;
+//        Trans_chr[cnt++] = (Trans_chr[1]^Trans_chr[2]^Trans_chr[3]^Trans_chr[4]) & 0x7F;
 
-        Send_Serial_String(Serial, Trans_chr, cnt);
-        sleep(1);
+//        Send_Serial_String(Serial, Trans_chr, cnt);
+//        sleep(1);
 
         memset(Trans_chr, '\0', sizeof(Trans_chr));
         memset(Recev_chr, '\0', sizeof(Recev_chr));
@@ -188,9 +189,41 @@ int Read_Serial_Char(int Serial, unsigned char *Recei_chr)
 
 void rev_func(const uxa_serial_msgs::transmit::ConstPtr &msg)
 {    
-    ROS_INFO("Serial receive msg : 0x%x",msg->tx_data);
+    ROS_INFO("Serial receive msg : 0x%x to Send",msg->tx_data);
     *msg_buf = msg->tx_data;
 //    temp = (unsigned char)msg->tx_data;
 //    Send_Serial_Char(Serial, &temp);
     Send_Serial_Char(Serial, msg_buf);
+}
+
+bool response_func(uxa_sam_msgs::sam_response::Request  &req,
+         uxa_sam_msgs::sam_response::Response &res)
+{
+    unsigned char Recev_chr[2];
+    unsigned char Trans_chr[_SERIAL_BUFF_SIZE];
+    unsigned char cnt = 0;
+
+    Trans_chr[cnt++] = 0xFF;
+    Trans_chr[cnt++] = (unsigned char)(req.samid| (5 << 5));
+    Trans_chr[cnt++] = 0x00;
+    Trans_chr[cnt++] = (Trans_chr[1]^Trans_chr[2]) & 0x7F;
+    Send_Serial_String(Serial, Trans_chr, cnt);
+
+
+              if(read(Serial, Recev_chr, 2) > 0)
+              {
+                  res.data1 = Recev_chr[0];
+                  res.data2 = Recev_chr[1];
+                  ROS_INFO("Request: ID=%d",(uint)req.samid);
+                  ROS_INFO("Response byte: [%d], [%d]", (uint8_t)res.data1, (uint8_t)res.data2);
+              }
+              else
+              {
+                  res.data1 = 0x00;
+                  res.data2 = 0x00;
+                  ROS_INFO("Request: ID=%d",(uint8_t)req.samid);
+                  ROS_INFO("Response byte: nodatata");
+
+              }
+      return true;
 }

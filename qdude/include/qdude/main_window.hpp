@@ -54,6 +54,9 @@ public Q_SLOTS:
     *******************************************/
     void updateLoggingView(); // no idea why this can't connect automatically
 
+private slots:
+    void on_pushButton_clicked();
+
 private:
 	Ui::MainWindowDesign ui;
 	QNode qnode;

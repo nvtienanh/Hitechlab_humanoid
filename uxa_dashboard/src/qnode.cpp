@@ -58,6 +58,8 @@ bool QNode::init() {
     // Serial Message
     uxa_serial_pub = n.advertise<uxa_serial_msgs::receive>("uxa_serial_publisher", _MSG_BUFF_SIZE);
     uxa_serial_sub = n.subscribe<uxa_serial_msgs::transmit>("uxa_serial_subscriber", _MSG_BUFF_SIZE, &QNode::rev_func,this);
+    // Sam service client
+//    sam_driver_client = n.serviceClient<uxa_sam_msgs::sam_response>("sam_cmd");
 	start();
     QNode::Serial = -1;
     if((Serial = Init_Serial(_SERIAL_PORT)) != -1)
@@ -86,26 +88,10 @@ bool QNode::init() {
 
         Send_Serial_String(Serial, Trans_chr, cnt);
         sleep(1);
-
-//        cnt = 0;
-
-//        Trans_chr[cnt++] = 0xFF;
-//        Trans_chr[cnt++] = (unsigned char)(7 << 5);
-//        Trans_chr[cnt++] = 225;
-//        Trans_chr[cnt++] = 0;
-//        Trans_chr[cnt++] = 0X07;
-//        Trans_chr[cnt++] = (Trans_chr[1]^Trans_chr[2]^Trans_chr[3]^Trans_chr[4]) & 0x7F;
-
-//        Send_Serial_String(Serial, Trans_chr, cnt);
-//        sleep(1);
-
         memset(Trans_chr, '\0', sizeof(Trans_chr));
         memset(Recev_chr, '\0', sizeof(Recev_chr));
 
         std::cout << "SERIAL : " <<  "Serial communication stand by." << std::endl << std::endl;
-
-//        uxa_serial_msgs::receive msg;
-
 
     }
 
@@ -133,6 +119,9 @@ bool QNode::init(const std::string &master_url, const std::string &host_url) {
     // Serial Publisher
     uxa_serial_pub = n.advertise<uxa_serial_msgs::receive>("uxa_serial_publisher", _MSG_BUFF_SIZE);
     uxa_serial_sub = n.subscribe<uxa_serial_msgs::transmit>("uxa_serial_subscriber", _MSG_BUFF_SIZE, &QNode::rev_func,this);
+    // Sam service client
+//    sam_driver_client = n.serviceClient<uxa_sam_msgs::sam_response>("sam_cmd");
+
     start();
     if((Serial = Init_Serial(_SERIAL_PORT)) != -1)
     {
@@ -159,24 +148,10 @@ bool QNode::init(const std::string &master_url, const std::string &host_url) {
 
         Send_Serial_String(Serial, Trans_chr, cnt);
         sleep(1);
-
-//        cnt = 0;
-
-//        Trans_chr[cnt++] = 0xFF;
-//        Trans_chr[cnt++] = (unsigned char)(7 << 5);
-//        Trans_chr[cnt++] = 225;
-//        Trans_chr[cnt++] = 0;
-//        Trans_chr[cnt++] = 0X07;
-//        Trans_chr[cnt++] = (Trans_chr[1]^Trans_chr[2]^Trans_chr[3]^Trans_chr[4]) & 0x7F;
-
-//        Send_Serial_String(Serial, Trans_chr, cnt);
-//        sleep(1);
-
         memset(Trans_chr, '\0', sizeof(Trans_chr));
         memset(Recev_chr, '\0', sizeof(Recev_chr));
 
         std::cout << "SERIAL : " <<  "Serial communication stand by." << std::endl << std::endl;
-//        uxa_serial_msgs::receive msg;
     }
 	return true;
 }
@@ -307,12 +282,8 @@ void QNode::send_std_position(unsigned int pos)
     std_pos_move_pub.publish(sam_std_pos_move_msg);
 }
 
-void QNode::get_position()
+uint8_t *QNode::get_position(uint8_t id)
 {
-    sam_pos_move_msg.id = 24;
-    sam_pos_move_msg.pos = 0x00;
-    sam_pos_move_msg.torqlevel = 5;
-    pos_move_pub.publish(sam_pos_move_msg);
 
 
 }

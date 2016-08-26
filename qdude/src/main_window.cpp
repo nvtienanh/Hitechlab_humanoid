@@ -167,7 +167,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	QMainWindow::closeEvent(event);
 }
 
+void MainWindow::on_pushButton_clicked()
+{
+
+}
+
 }  // namespace qdude
+
+
 
 
 

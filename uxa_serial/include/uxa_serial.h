@@ -14,6 +14,7 @@ using namespace std;
 
 #include <uxa_serial_msgs/receive.h>
 #include <uxa_serial_msgs/transmit.h>
+#include <uxa_sam_msgs/sam_response.h>
 
 #define _SERIAL_PORT "/dev/ttyUSB0"
 #define _SERIAL_BUFF_SIZE    20
@@ -41,5 +42,7 @@ void Send_Serial_Char(int Serial, unsigned char *Trans_chr);
 int Read_Serial_Char(int Serial, unsigned char *Recei_chr);
 void rev_func(const uxa_serial_msgs::transmit::ConstPtr &msg);
 
+bool response_func(uxa_sam_msgs::sam_response::Request  &req,
+         uxa_sam_msgs::sam_response::Response &res);
 
 #endif // UXA_SERIAL_H

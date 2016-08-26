@@ -33,6 +33,7 @@
 #include <uxa_serial_msgs/receive.h>
 #include <uxa_serial_msgs/transmit.h>
 
+
 #define _SERIAL_PORT "/dev/ttyUSB0"
 #define _SERIAL_BUFF_SIZE    20
 #define _BAUDRATE    B115200
@@ -70,14 +71,14 @@ public:
 
 	QStringListModel* loggingModel() { return &logging_model; }
 	void log( const LogLevel &level, const std::string &msg);
-    QStringListModel* consoleModel() { return &console_model; }
-    void console( const LogLevel &level, const std::string &msg);
+        QStringListModel* consoleModel() { return &console_model; }
+        void console( const LogLevel &level, const std::string &msg);
 
         void send_msg();
         void send_msg(unsigned char input);
         void send_msg(std::string str);
         void send_std_position(unsigned int pos);
-        void get_position();
+        uint8_t* get_position(uint8_t id);
 
         int Serial;
 //        unsigned char *msg_buf=new unsigned char [_SERIAL_BUFF_SIZE];
@@ -99,7 +100,7 @@ Q_SIGNALS:
 
 private:
         int init_argc;
-        char** init_argv;
+        char** init_argv;        
 
         ros::Publisher chatter_publisher;
         ros::Publisher dashboard_pub;

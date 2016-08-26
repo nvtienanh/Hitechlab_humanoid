@@ -273,7 +273,9 @@ void MainWindow::on_btnInitMotion_clicked()
 
 void MainWindow::on_GetPosition_clicked()
 {
-    qnode.get_position();
+
+    qnode.get_position(24);
+
 }
 
 }  // namespace uxa_dashboard

@@ -7,15 +7,14 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
 )
 
-
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES uxa_sam_driver
+  LIBRARIES uxa_sam_driver sam_serial_1
   CATKIN_DEPENDS roscpp
   DEPENDS system_lib
 )
 
-include_directories(include
+include_directories(include ${catkin_INCLUDE_DIRS}
 )
 
 
@@ -26,3 +25,9 @@ add_executable(uxa_sam_driver src/uxa_sam_driver.cpp src/sam_packet.cpp)
 
 add_dependencies(uxa_sam_driver uxa_serial_msgs_generate_messages_cpp)
 add_dependencies(uxa_sam_driver uxa_sam_msgs_generate_messages_cpp)
+
+
+
+
+# %EndTag(SRVCLIENT)%
+
