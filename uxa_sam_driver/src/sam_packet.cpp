@@ -2,9 +2,8 @@
 
 uxa_serial_msgs::transmit serial_pub_msg;
 
-ros::Publisher uxa_serial_pub, sam_state_pub;
+ros::Publisher uxa_serial_pub;
 ros::Subscriber uxa_serial_sub, sam_driver_position_move_sub, sam_driver_std_position_move_sub;
-ros::ServiceClient sam_driver_client;
 
 unsigned char Send_buf[_MSG_BUFF_SIZE];
 
@@ -13,6 +12,7 @@ using namespace std;
 void SERIAL_SUB_FUNC(const uxa_serial_msgs::receive::ConstPtr &msg)
 {
     ROS_INFO("SAM recieve msg : 0x%x",msg->rx_data);
+//    uxa_serial_pub.publish(msg);
 //    sam_state_pub.publish(msg->rx_data);
 }
 
@@ -33,9 +33,6 @@ void Init_Message()
     uxa_serial_pub = n.advertise<uxa_serial_msgs::transmit>
             ("uxa_serial_subscriber", _MSG_BUFF_SIZE);
 
-    sam_state_pub = n.advertise<uxa_serial_msgs::transmit>
-            ("sam_state_subscriber", 2);
-
     uxa_serial_sub = n.subscribe<uxa_serial_msgs::receive>
             ("uxa_serial_publisher", _MSG_BUFF_SIZE, SERIAL_SUB_FUNC);
 
@@ -44,9 +41,6 @@ void Init_Message()
 
     sam_driver_std_position_move_sub = n.subscribe<uxa_sam_msgs::std_position_move>
             ("sam_driver_std_position_move", _MSG_BUFF_SIZE, SAM_STD_POS_MOVE_FUNC);
-
-    sam_driver_client = n.serviceClient<uxa_sam_msgs::sam_response>("sam_cmd");
-
 
 }
 

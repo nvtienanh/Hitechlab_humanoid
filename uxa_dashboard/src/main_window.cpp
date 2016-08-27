@@ -69,31 +69,6 @@ void MainWindow::showNoMasterMessage() {
     close();
 }
 
-/*
- * These triggers whenever the button is clicked, regardless of whether it
- * is already checked or not.
- */
-
-//void MainWindow::on_button_connect_clicked(bool check ) {
-//	if ( ui.checkbox_use_environment->isChecked() ) {
-//        cout << "asd" << endl;
-//		if ( !qnode.init() ) {
-//			showNoMasterMessage();
-//		} else {
-//			ui.button_connect->setEnabled(false);
-//		}
-//	} else {
-//		if ( ! qnode.init(ui.line_edit_master->text().toStdString(),
-//				   ui.line_edit_host->text().toStdString()) ) {
-//			showNoMasterMessage();
-//		} else {
-//			ui.button_connect->setEnabled(false);
-//			ui.line_edit_master->setReadOnly(true);
-//			ui.line_edit_host->setReadOnly(true);
-//			ui.line_edit_topic->setReadOnly(true);
-//		}
-//    }
-//}
 
 void MainWindow::on_button_connect_clicked(bool check ) {    
     if ( !qnode.init() ) {// connect error
@@ -127,8 +102,8 @@ void MainWindow::on_checkbox_use_environment_stateChanged(int state) {
  * the user can always see the latest log message.
  */
 void MainWindow::updateLoggingView() {
-//        ui.view_logging->scrollToBottom();
-        ui.view_status->scrollToBottom();
+        ui.view_logging->scrollToBottom();
+//        ui.view_status->scrollToBottom();
 }
 
 void MainWindow::updateConsoleView() {
@@ -218,45 +193,8 @@ void MainWindow::on_btnSitdown_clicked()
 
 void MainWindow::on_btnInitSerial_clicked()
 {
-    unsigned char Trans_chr[_SERIAL_BUFF_SIZE];
-    unsigned char Recev_chr[_SERIAL_BUFF_SIZE];
-    unsigned char cnt = 0;
+    qnode.get_serial();
 
-    Trans_chr[cnt++] = 0xFF; //1
-    Trans_chr[cnt++] = 0xFF; //2
-    Trans_chr[cnt++] = 0xAA; //3
-    Trans_chr[cnt++] = 0x55; //4
-    Trans_chr[cnt++] = 0xAA; //5
-    Trans_chr[cnt++] = 0x55; //6
-    Trans_chr[cnt++] = 0x37; //7
-    Trans_chr[cnt++] = 0xBA; //8
-
-    Trans_chr[cnt++] = 0x10; //9
-    Trans_chr[cnt++] = 0x00; //10
-    Trans_chr[cnt++] = 0x00; //11
-    Trans_chr[cnt++] = 0x00; //12
-    Trans_chr[cnt++] = 0x00; //13
-    Trans_chr[cnt++] = 0x01; //14
-    Trans_chr[cnt++] = 0x01; //15
-    Trans_chr[cnt++] = 0x01; //16
-
-    qnode.Send_Serial_String(qnode.Serial, Trans_chr, cnt);
-    sleep(1);
-
-    cnt = 0;
-
-    Trans_chr[cnt++] = 0xFF;
-    Trans_chr[cnt++] = (unsigned char)(7 << 5);
-    Trans_chr[cnt++] = 225;
-    Trans_chr[cnt++] = 0;
-    Trans_chr[cnt++] = 0X07;
-    Trans_chr[cnt++] = (Trans_chr[1]^Trans_chr[2]^Trans_chr[3]^Trans_chr[4]) & 0x7F;
-
-    qnode.Send_Serial_String(qnode.Serial, Trans_chr, cnt);
-    sleep(1);
-
-    memset(Trans_chr, '\0', sizeof(Trans_chr));
-    memset(Recev_chr, '\0', sizeof(Recev_chr));
 
 }
 
@@ -275,6 +213,11 @@ void MainWindow::on_GetPosition_clicked()
 {
 
     qnode.get_position(24);
+//    for(uint idx=0;idx<=24;idx=idx+1)
+//    {
+//        qnode.get_position(idx);
+
+//    }
 
 }
 

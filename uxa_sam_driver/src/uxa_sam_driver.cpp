@@ -14,25 +14,11 @@ int main(int argc, char **argv)
 
     ros::Rate loop_rate(1000);
 
-    cout << "SAM_DRIVER : " <<  "SAM DRIVER stand by.." << endl << endl;
-    uxa_sam_msgs::sam_response samclient;
+    cout << "SAM_DRIVER : " <<  "SAM DRIVER stand by.." << endl << endl;    
 
     while(ros::ok())
     {
 
-        samclient.request.samid = 24;
-
-        if (sam_driver_client.call(samclient))
-        {
-          ROS_INFO("Data 1: %d", (uint8_t)samclient.response.data1);
-          ROS_INFO("Data 2: %d", (uint8_t)samclient.response.data2);
-
-        }
-        else
-        {
-          ROS_ERROR("Failed to call service sam_cmd");
-
-        }
         loop_rate.sleep();
         ros::spinOnce();        
     }

@@ -8,7 +8,9 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
 
     ros::Publisher uxa_serial_pub = n.advertise<uxa_serial_msgs::receive>("uxa_serial_publisher", _MSG_BUFF_SIZE);
+    ros::Publisher dashboard_to_serial_pub = n.advertise<uxa_serial_msgs::receive>("dashboard_to_serial_pub", _MSG_BUFF_SIZE);
     ros::Subscriber uxa_serial_sub = n.subscribe<uxa_serial_msgs::transmit>("uxa_serial_subscriber", _MSG_BUFF_SIZE, rev_func);
+    ros::Subscriber dashboard_to_serial_sub = n.subscribe<uxa_serial_msgs::transmit>("dashboard_to_serial_sub", _MSG_BUFF_SIZE, dashboard_msg_func);
     ros::ServiceServer sam_service = n.advertiseService("sam_cmd", response_func);
 
     ros::Rate loop_rate(1000);
@@ -56,9 +58,6 @@ int main(int argc, char **argv)
 
         cout << "SERIAL : " <<  "Serial communication stand by." << endl << endl;
 
-//        uxa_serial_msgs::receive msg;
-
-
         while(ros::ok())
         {
             loop_rate.sleep();
@@ -66,8 +65,11 @@ int main(int argc, char **argv)
 //            {
 //                msg.rx_data = Recev_chr[0];
 //                ROS_INFO("UXA_serial receive msg : 0x%x",msg.rx_data);
-//                uxa_serial_pub.publish(msg);
+////                uxa_serial_pub.publish(msg);
+////                if (Recev_chr[0]=='\r')  ROS_INFO("END DATA======");
 //            }
+            // Flush the port
+//            tcflush(Serial, TCIFLUSH);
             ros::spinOnce();
         }
 
@@ -108,7 +110,7 @@ int Init_Serial(const char *Serial_Port)
             else
             {
                 cout << "SERIAL : " << Serial_Port << " Device permission change error" << endl;
-                //return -1;
+                return -1;
             }
         }
 
@@ -123,7 +125,7 @@ int Init_Serial(const char *Serial_Port)
     Serial_Setting.c_oflag = 0;
     Serial_Setting.c_cflag = _BAUDRATE | CS8 | CREAD | CLOCAL;
     Serial_Setting.c_lflag = 0;
-    Serial_Setting.c_cc[VMIN] = 1;
+    Serial_Setting.c_cc[VMIN] = 1;//1
     Serial_Setting.c_cc[VTIME] = 0;
 
     cfsetispeed(&Serial_Setting, _BAUDRATE);
@@ -191,15 +193,20 @@ void rev_func(const uxa_serial_msgs::transmit::ConstPtr &msg)
 {    
     ROS_INFO("Serial receive msg : 0x%x to Send",msg->tx_data);
     *msg_buf = msg->tx_data;
-//    temp = (unsigned char)msg->tx_data;
-//    Send_Serial_Char(Serial, &temp);
+    Send_Serial_Char(Serial, msg_buf);
+}
+
+void dashboard_msg_func(const uxa_serial_msgs::transmit::ConstPtr &msg)
+{
+    ROS_INFO("Dashboard send message : 0x%x to SAM",msg->tx_data);
+    *msg_buf = msg->tx_data;
     Send_Serial_Char(Serial, msg_buf);
 }
 
 bool response_func(uxa_sam_msgs::sam_response::Request  &req,
          uxa_sam_msgs::sam_response::Response &res)
 {
-    unsigned char Recev_chr[2];
+    unsigned char Recev_chr[_SERIAL_BUFF_SIZE];
     unsigned char Trans_chr[_SERIAL_BUFF_SIZE];
     unsigned char cnt = 0;
 
@@ -209,21 +216,27 @@ bool response_func(uxa_sam_msgs::sam_response::Request  &req,
     Trans_chr[cnt++] = (Trans_chr[1]^Trans_chr[2]) & 0x7F;
     Send_Serial_String(Serial, Trans_chr, cnt);
 
+//    while(read(Serial, Recev_chr, 2) <= 0)
+//    {
+//        res.data1 = Recev_chr[0];
+//        res.data2 = Recev_chr[1];
+//        ROS_INFO("Request: ID=%d",(uint)req.samid);
+//        ROS_INFO("Response byte: [%d], [%d]", (uint8_t)res.data1, (uint8_t)res.data2);
 
-              if(read(Serial, Recev_chr, 2) > 0)
-              {
-                  res.data1 = Recev_chr[0];
-                  res.data2 = Recev_chr[1];
-                  ROS_INFO("Request: ID=%d",(uint)req.samid);
-                  ROS_INFO("Response byte: [%d], [%d]", (uint8_t)res.data1, (uint8_t)res.data2);
-              }
-              else
-              {
-                  res.data1 = 0x00;
-                  res.data2 = 0x00;
-                  ROS_INFO("Request: ID=%d",(uint8_t)req.samid);
-                  ROS_INFO("Response byte: nodatata");
-
-              }
-      return true;
+//    }
+    if(read(Serial, Recev_chr, 2) > 0)
+    {
+        res.data1 = Recev_chr[0];
+        res.data2 = Recev_chr[1];
+        ROS_INFO("Request: ID=%d",(uint)req.samid);
+        ROS_INFO("Response byte: [%d], [%d]", (uint8_t)res.data1, (uint8_t)res.data2);
+    }
+    else
+    {
+        res.data1 = 0x00;
+        res.data2 = 0x00;
+        ROS_INFO("Request: ID=%d",(uint8_t)req.samid);
+        ROS_INFO("Response byte: nodatata");
+    }
+    return true;
 }

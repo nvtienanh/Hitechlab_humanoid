@@ -32,9 +32,8 @@
 #include <uxa_sam_msgs/position_move.h>
 #include <uxa_serial_msgs/receive.h>
 #include <uxa_serial_msgs/transmit.h>
+#include <uxa_sam_msgs/sam_response.h>
 
-
-#define _SERIAL_PORT "/dev/ttyUSB0"
 #define _SERIAL_BUFF_SIZE    20
 #define _BAUDRATE    B115200
 #define _MSG_BUFF_SIZE  20
@@ -78,7 +77,8 @@ public:
         void send_msg(unsigned char input);
         void send_msg(std::string str);
         void send_std_position(unsigned int pos);
-        uint8_t* get_position(uint8_t id);
+        uint* get_position(uint id);
+        void get_serial();
 
         int Serial;
 //        unsigned char *msg_buf=new unsigned char [_SERIAL_BUFF_SIZE];
@@ -88,9 +88,10 @@ public:
         void Send_Serial_String(int Serial, unsigned char *Trans_chr, int Size);
         void Send_Serial_Char(int Serial, unsigned char *Trans_chr);
         int Read_Serial_Char(int Serial, unsigned char *Recei_chr);
-        void rev_func(const uxa_serial_msgs::transmit::ConstPtr &msg);
+//        void rev_func(const uxa_serial_msgs::transmit::ConstPtr &msg);
+        void Message_sender(unsigned char *Send_data, int Size);
 
-        void Test_Sendata();
+
 
 Q_SIGNALS:
         void loggingUpdated();
@@ -108,13 +109,19 @@ private:
         ros::Publisher std_pos_move_pub;
         ros::Publisher pos_move_pub;
         ros::Publisher uxa_serial_pub;
-        ros::Subscriber uxa_serial_sub;
+        ros::Publisher dashboard_to_serial_pub;
+//        ros::Subscriber uxa_serial_sub;
+        ros::ServiceClient sam_driver_client;
+        ros::ServiceServer sam_driver_server;
 
         uxa_uic_msgs::remocon uic_pub_msg;
         uxa_uic_msgs::motion uic_motion_msg;
         uxa_sam_msgs::std_position_move sam_std_pos_move_msg;
         uxa_sam_msgs::position_move sam_pos_move_msg;
         uxa_serial_msgs::transmit serial_pub_msg;
+        uxa_serial_msgs::transmit dashboard_to_serial_pub_msg;
+        uxa_sam_msgs::sam_response samclient;
+
 
         QStringListModel logging_model;
         QStringListModel console_model;

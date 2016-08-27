@@ -55,45 +55,13 @@ bool QNode::init() {
     // SAM Driver Message
     std_pos_move_pub = n.advertise<uxa_sam_msgs::std_position_move>("sam_driver_std_position_move", 100);
     pos_move_pub = n.advertise<uxa_sam_msgs::position_move>("sam_driver_position_move", 100);
-    // Serial Message
+    // Serial Publisher
+    dashboard_to_serial_pub = n.advertise<uxa_serial_msgs::transmit>("dashboard_to_serial_sub", _MSG_BUFF_SIZE);
     uxa_serial_pub = n.advertise<uxa_serial_msgs::receive>("uxa_serial_publisher", _MSG_BUFF_SIZE);
-    uxa_serial_sub = n.subscribe<uxa_serial_msgs::transmit>("uxa_serial_subscriber", _MSG_BUFF_SIZE, &QNode::rev_func,this);
+//    uxa_serial_sub = n.subscribe<uxa_serial_msgs::transmit>("uxa_serial_subscriber", _MSG_BUFF_SIZE, &QNode::rev_func,this);
     // Sam service client
-//    sam_driver_client = n.serviceClient<uxa_sam_msgs::sam_response>("sam_cmd");
+    sam_driver_client = n.serviceClient<uxa_sam_msgs::sam_response>("sam_cmd");
 	start();
-    QNode::Serial = -1;
-    if((Serial = Init_Serial(_SERIAL_PORT)) != -1)
-    {
-        unsigned char Trans_chr[_SERIAL_BUFF_SIZE];
-        unsigned char Recev_chr[_SERIAL_BUFF_SIZE];
-        unsigned char cnt = 0;
-
-        Trans_chr[cnt++] = 0xFF; //1
-        Trans_chr[cnt++] = 0xFF; //2
-        Trans_chr[cnt++] = 0xAA; //3
-        Trans_chr[cnt++] = 0x55; //4
-        Trans_chr[cnt++] = 0xAA; //5
-        Trans_chr[cnt++] = 0x55; //6
-        Trans_chr[cnt++] = 0x37; //7
-        Trans_chr[cnt++] = 0xBA; //8
-
-        Trans_chr[cnt++] = 0x10; //9
-        Trans_chr[cnt++] = 0x00; //10
-        Trans_chr[cnt++] = 0x00; //11
-        Trans_chr[cnt++] = 0x00; //12
-        Trans_chr[cnt++] = 0x00; //13
-        Trans_chr[cnt++] = 0x01; //14
-        Trans_chr[cnt++] = 0x01; //15
-        Trans_chr[cnt++] = 0x01; //16
-
-        Send_Serial_String(Serial, Trans_chr, cnt);
-        sleep(1);
-        memset(Trans_chr, '\0', sizeof(Trans_chr));
-        memset(Recev_chr, '\0', sizeof(Recev_chr));
-
-        std::cout << "SERIAL : " <<  "Serial communication stand by." << std::endl << std::endl;
-
-    }
 
 	return true;
 }
@@ -117,65 +85,28 @@ bool QNode::init(const std::string &master_url, const std::string &host_url) {
     std_pos_move_pub = n.advertise<uxa_sam_msgs::std_position_move>("sam_driver_std_position_move", 100);
     pos_move_pub = n.advertise<uxa_sam_msgs::position_move>("sam_driver_position_move", 100);
     // Serial Publisher
-    uxa_serial_pub = n.advertise<uxa_serial_msgs::receive>("uxa_serial_publisher", _MSG_BUFF_SIZE);
-    uxa_serial_sub = n.subscribe<uxa_serial_msgs::transmit>("uxa_serial_subscriber", _MSG_BUFF_SIZE, &QNode::rev_func,this);
+    dashboard_to_serial_pub = n.advertise<uxa_serial_msgs::receive>("dashboard_to_serial", _MSG_BUFF_SIZE);
+    uxa_serial_pub = n.advertise<uxa_serial_msgs::receive>("uxa_serial_subscriber", _MSG_BUFF_SIZE);
+//    uxa_serial_sub = n.subscribe<uxa_serial_msgs::transmit>("uxa_serial_subscriber", _MSG_BUFF_SIZE, &QNode::rev_func,this);
     // Sam service client
-//    sam_driver_client = n.serviceClient<uxa_sam_msgs::sam_response>("sam_cmd");
+    sam_driver_client = n.serviceClient<uxa_sam_msgs::sam_response>("sam_cmd");
 
     start();
-    if((Serial = Init_Serial(_SERIAL_PORT)) != -1)
-    {
-        unsigned char Trans_chr[_SERIAL_BUFF_SIZE];
-        unsigned char Recev_chr[_SERIAL_BUFF_SIZE];
-        unsigned char cnt = 0;
 
-        Trans_chr[cnt++] = 0xFF;
-        Trans_chr[cnt++] = 0xFF;
-        Trans_chr[cnt++] = 0xAA;
-        Trans_chr[cnt++] = 0x55;
-        Trans_chr[cnt++] = 0xAA;
-        Trans_chr[cnt++] = 0x55;
-        Trans_chr[cnt++] = 0x37;
-        Trans_chr[cnt++] = 0xBA;
-        Trans_chr[cnt++] = 0x10;
-        Trans_chr[cnt++] = 0x00;
-        Trans_chr[cnt++] = 0x00;
-        Trans_chr[cnt++] = 0x00;
-        Trans_chr[cnt++] = 0x00;
-        Trans_chr[cnt++] = 0x01;
-        Trans_chr[cnt++] = 0x01;
-        Trans_chr[cnt++] = 0x01;
-
-        Send_Serial_String(Serial, Trans_chr, cnt);
-        sleep(1);
-        memset(Trans_chr, '\0', sizeof(Trans_chr));
-        memset(Recev_chr, '\0', sizeof(Recev_chr));
-
-        std::cout << "SERIAL : " <<  "Serial communication stand by." << std::endl << std::endl;
-    }
 	return true;
 }
 
 void QNode::run() {
-	ros::Rate loop_rate(1);
+    ros::Rate loop_rate(100);
 //	int count = 0;
-    unsigned char Recev_chr[_SERIAL_BUFF_SIZE];
-    uxa_serial_msgs::receive receivemsg;
 	while ( ros::ok() ) {        
-        std_msgs::String msg;
-        std::stringstream ss;
+
 //		ss << "hello world " << count;
 //		msg.data = ss.str();
 //		chatter_publisher.publish(msg);
 //        log(Info,std::string("I sent: ")+msg.data);
-        if(Read_Serial_Char(Serial, Recev_chr) == 1)
-        {
-            receivemsg.rx_data = Recev_chr[0];//          
-            uxa_serial_pub.publish(receivemsg);
-            ss << "I receive: " <<std::hex<< unsigned(Recev_chr[0]);
-            msg.data = ss.str();
-            log(Info,msg.data);
-        }
+//        get_position(24);
+
 		ros::spinOnce();
 		loop_rate.sleep();
 //		++count;
@@ -221,7 +152,7 @@ void QNode::log( const LogLevel &level, const std::string &msg) {
 }
 
 void QNode::console( const LogLevel &level, const std::string &msg) {
-    logging_model.insertRows(logging_model.rowCount(),1);
+    console_model.insertRows(console_model.rowCount(),1);
     std::stringstream console_model_msg;
     switch ( level ) {
         case(Debug) : {
@@ -282,8 +213,24 @@ void QNode::send_std_position(unsigned int pos)
     std_pos_move_pub.publish(sam_std_pos_move_msg);
 }
 
-uint8_t *QNode::get_position(uint8_t id)
+uint *QNode::get_position(uint id)
 {
+    samclient.request.samid = id;    
+    std::stringstream ss;
+
+    if (sam_driver_client.call(samclient))
+    {
+      ROS_INFO("Data 1: %d", samclient.response.data1);
+      ROS_INFO("Data 2: %d", samclient.response.data2);
+      ss << "ID: " << unsigned(id) << " Byte[0]: " << unsigned(samclient.response.data1) << " Byte[1]: "<< uint(samclient.response.data2);
+      console(Info,ss.str());
+
+    }
+    else
+    {
+      ROS_ERROR("Failed to call service sam_cmd");
+
+    }
 
 
 }
@@ -393,33 +340,42 @@ int QNode::Read_Serial_Char(int Serial, unsigned char *Recei_chr)
     return -1;
 }
 
-void QNode::rev_func(const uxa_serial_msgs::transmit::ConstPtr &msg)
+//void QNode::rev_func(const uxa_serial_msgs::transmit::ConstPtr &msg)
+//{
+//    std_msgs::String serialmsg;
+//    std::stringstream ss;
+//    *msg_buf = msg->tx_data;
+////    Send_Serial_Char(Serial, msg_buf);
+//    ss << "Dashboard serial transmit: " << std::hex << unsigned(msg_buf[0]);
+//    serialmsg.data = ss.str();
+//    console(Info,serialmsg.data);
+//}
+
+void QNode::get_serial()
 {
-    std_msgs::String serialmsg;
-    std::stringstream ss;
-    *msg_buf = msg->tx_data;
-    Send_Serial_Char(Serial, msg_buf);
-    ss << "Dashboard serial transmit: " << std::hex << unsigned(msg_buf[0]);
-    serialmsg.data = ss.str();
-    log(Info,serialmsg.data);
+    unsigned char Trans_chr[6];
+    unsigned char cnt = 0;
+
+    Trans_chr[cnt++] = 0xFF;
+    Trans_chr[cnt++] = (unsigned char)(7 << 5);
+    Trans_chr[cnt++] = 225;
+    Trans_chr[cnt++] = 0;
+    Trans_chr[cnt++] = 0X07;
+    Trans_chr[cnt++] = (Trans_chr[1]^Trans_chr[2]^Trans_chr[3]^Trans_chr[4]) & 0x7F;
+
+    Message_sender(Trans_chr, cnt);
+    sleep(1);
+
 }
 
-void QNode::Test_Sendata(){
-    unsigned char Trans_chr[6];
-    unsigned char counter = 0;
-    Trans_chr[counter++] = 0xFF; //0
-    Trans_chr[counter++] = 24|(7<<5); //1
-    Trans_chr[counter++] = 0x00; //2
-    Trans_chr[counter++] = 0x00; //3
-    Trans_chr[counter++] = 0x00; //4
-    Trans_chr[counter++] = (Trans_chr[1]^Trans_chr[2]) & 0x7F; //4
-    Send_Serial_String(Serial, Trans_chr, counter);
-    sleep(1);
-    std_msgs::String serialmsg;
-    std::stringstream ss;
-    ss << "Button CLick!";
-    serialmsg.data = ss.str();
-    log(Info,serialmsg.data);
+void QNode::Message_sender(unsigned char *Send_data, int Size)
+{
+    for(char cnt = 0; cnt < Size; cnt++)
+    {
+        dashboard_to_serial_pub_msg.tx_data = Send_data[cnt];
+        dashboard_to_serial_pub.publish(dashboard_to_serial_pub_msg);
+    }
 }
+
 
 }  // namespace uxa_dashboard
